@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayConnect Baserow Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f6; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        h1 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        #order-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        #order-table th, #order-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        #order-table th { background-color: #007bff; color: white; }
+        .status-select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        .btn-refresh { background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; }
+        .btn-refresh:hover { background-color: #218838; }
+        .status-Pending { color: orange; font-weight: bold; }
+        .status-Delivered { color: green; font-weight: bold; }
+        .status-Failed { color: red; font-weight: bold; }
+        .status-Initiated { color: blue; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Baserow Order Management</h1>
+        <button id="refreshBtn" class="btn-refresh">🔄 Refresh Orders</button>
+        <p id="loading-msg">Loading orders from Baserow...</p>
+        <p id="error-msg" class="hidden" style="color: red;">Error: Could not load data. Check console for details.</p>
+        
+        <table id="order-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Order ID</th>
+                    <th>Recipient</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Current Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="orders-body">
+                </tbody>
+        </table>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
