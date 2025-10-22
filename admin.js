@@ -8,7 +8,8 @@ const BASEROW_API_KEY = "TXYNusXB6dycZSNPDBiMg19RfnnXM5zn"; // <-- YOUR API KEY
 const BASEROW_TABLE_ID = "714403"; // <-- YOUR TABLE ID
 const BASEROW_HOST_URL = "https://api.baserow.io"; 
 
-const ORDERS_ENDPOINT = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true`;
+// --- UPDATED LINE: Added &size=1000 to fetch up to 1000 records ---
+const ORDERS_ENDPOINT = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=1000`;
 
 let allOrders = []; // Stores all fetched orders for local filtering
 
