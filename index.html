@@ -8,12 +8,22 @@
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f6; }
         .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
         h1 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .controls { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
+        .controls label { font-weight: bold; }
+        .controls input, .controls select, .btn-refresh, .btn-complete { padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
+
         #order-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         #order-table th, #order-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        #order-table th { background-color: #007bff; color: white; }
-        .status-select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
-        .btn-refresh { background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; }
+        #order-table th { background-color: #007bff; color: white; cursor: pointer; }
+        #order-table th:hover { background-color: #0069d9; }
+        
+        .btn-refresh { background-color: #28a745; color: white; border: none; cursor: pointer; }
         .btn-refresh:hover { background-color: #218838; }
+        
+        .btn-complete { background-color: #ffc107; color: #333; border: none; cursor: pointer; font-size: 12px; padding: 5px 8px;}
+        .btn-complete:hover { background-color: #e0a800; }
+        .btn-complete:disabled { background-color: #ccc; cursor: not-allowed; }
+
         .status-Pending { color: orange; font-weight: bold; }
         .status-Delivered { color: green; font-weight: bold; }
         .status-Failed { color: red; font-weight: bold; }
@@ -24,20 +34,40 @@
 <body>
     <div class="container">
         <h1>Baserow Order Management</h1>
-        <button id="refreshBtn" class="btn-refresh">🔄 Refresh Orders</button>
+        
+        <div class="controls">
+            <button id="refreshBtn" class="btn-refresh">🔄 Refresh Orders</button>
+            
+            <div>
+                <label for="statusFilter">Filter Status:</label>
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Failed">Failed</option>
+                    <option value="Initiated">Initiated</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="searchBar">Search (Order ID/Phone):</label>
+                <input type="text" id="searchBar" placeholder="Search...">
+            </div>
+        </div>
+        
         <p id="loading-msg">Loading orders from Baserow...</p>
         <p id="error-msg" class="hidden" style="color: red;">Error: Could not load data. Check console for details.</p>
         
         <table id="order-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Order ID</th>
-                    <th>Recipient</th>
-                    <th>Plan</th>
-                    <th>Amount</th>
-                    <th>Current Status</th>
-                    <th>Action</th>
+                    <th data-sort="id">ID</th>
+                    <th data-sort="Order ID">Order ID</th>
+                    <th data-sort="Data Recipient Number">Recipient</th>
+                    <th data-sort="Data Plan">Plan</th>
+                    <th data-sort="Amount">Amount</th>
+                    <th data-sort="Status">Current Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="orders-body">
