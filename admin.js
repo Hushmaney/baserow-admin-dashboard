@@ -8,7 +8,7 @@ const BASEROW_API_KEY = "TXYNusXB6dycZSNPDBiMg19RfnnXM5zn"; // <-- YOUR API KEY
 const BASEROW_TABLE_ID = "714403"; // <-- YOUR TABLE ID
 const BASEROW_HOST_URL = "https://api.baserow.io"; 
 
-// --- UPDATED LINE: Added &size=1000 to fetch up to 1000 records ---
+// --- CORRECTED LINE: Includes '?user_field_names=true&size=1000' for proper query string syntax and limit increase ---
 const ORDERS_ENDPOINT = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=1000`;
 
 let allOrders = []; // Stores all fetched orders for local filtering
@@ -35,7 +35,9 @@ async function fetchOrders() {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            // Throwing an error here with the status code and text.
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
