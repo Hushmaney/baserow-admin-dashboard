@@ -8,13 +8,13 @@ const BASEROW_API_KEY = "TXYNusXB6dycZSNPDBiMg19RfnnXM5zn"; // <-- YOUR API KEY
 const BASEROW_TABLE_ID = "714403"; // <-- YOUR TABLE ID
 const BASEROW_HOST_URL = "https://api.baserow.io"; 
 
-// Base URL for fetching data, ordered by ID descending (newest first)
+// Base URL for fetching data, ordered by ID descending (newest first, size=100)
 const BASE_ORDERS_URL = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=100&order_by=-id`;
 
 // Endpoints to fetch 100 PENDING and 100 DELIVERED records
-// Baserow Filter: &filter__field_name__filter_type=value
-const PENDING_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__equal=Pending`;
-const DELIVERED_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__equal=Delivered`;
+// FIXED: Using '__contains' filter type for single_select fields (Status)
+const PENDING_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__contains=Pending`;
+const DELIVERED_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__contains=Delivered`;
 
 let allOrders = []; // Stores all fetched orders (max 200: 100 Pending + 100 Delivered)
 
@@ -52,8 +52,10 @@ async function fetchOrders() {
         });
 
         if (!pendingResponse.ok || !deliveredResponse.ok) {
-            const errorText = await (pendingResponse.ok ? deliveredResponse : pendingResponse).text();
-            throw new Error(`HTTP error! Status: ${pendingResponse.status}/${deliveredResponse.status} - ${errorText}`);
+            // Get error text from the response that failed
+            const failedResponse = pendingResponse.ok ? deliveredResponse : pendingResponse;
+            const errorText = await failedResponse.text();
+            throw new Error(`HTTP error! Status: ${failedResponse.status} - ${errorText}`);
         }
 
         const pendingData = await pendingResponse.json();
@@ -99,10 +101,6 @@ function filterAndRenderOrders() {
     filteredOrders.forEach(order => {
         const row = ordersBody.insertRow();
         const currentStatusValue = order.Status ? order.Status.value : 'Unknown';
-        
-        // This logic now ensures that all "Pending" and "Delivered" are visible
-        // However, the filter dropdown allows viewing "Initiated" and "Failed" as well, 
-        // if they happen to be among the 200 records fetched.
         
         const isPending = currentStatusValue === 'Pending';
         
