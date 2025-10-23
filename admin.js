@@ -8,9 +8,8 @@ const BASEROW_API_KEY = "TXYNusXB6dycZSNPDBiMg19RfnnXM5zn"; // <-- YOUR API KEY
 const BASEROW_TABLE_ID = "714403"; // <-- YOUR TABLE ID
 const BASEROW_HOST_URL = "https://api.baserow.io"; 
 
-// --- FIXED LINE: Changed 'order_by=-id' to 'order_by=id' ---
-// This attempts to sort by the unique row ID field 'id' in ascending order.
-const BASE_ORDERS_URL = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=100&order_by=id`;
+// --- FIXED LINE: Removed 'order_by' to rely on Baserow's default chronological order. ---
+const BASE_ORDERS_URL = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=100`;
 
 // Endpoints to fetch 100 PENDING and 100 DELIVERED records
 const PENDING_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__contains=Pending`;
@@ -62,6 +61,9 @@ async function fetchOrders() {
 
         // Combine the results (max 200 orders total)
         allOrders = [...pendingData.results, ...deliveredData.results];
+        
+        // --- NEW LINE: Reverse the array to put the newest records first ---
+        allOrders.reverse();
         
         filterAndRenderOrders(); // Render based on current filters
         
