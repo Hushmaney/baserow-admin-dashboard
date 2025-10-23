@@ -8,8 +8,8 @@ const BASEROW_API_KEY = "TXYNusXB6dycZSNPDBiMg19RfnnXM5zn"; // <-- YOUR API KEY
 const BASEROW_TABLE_ID = "714403"; // <-- YOUR TABLE ID
 const BASEROW_HOST_URL = "https://api.baserow.io"; 
 
-// --- CORRECTED LINE: Includes '?user_field_names=true&size=1000' for proper query string syntax and limit increase ---
-const ORDERS_ENDPOINT = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=1000`;
+// --- FIXED LINE: Size is set to the maximum allowed limit of 200 to resolve the 400 error. ---
+const ORDERS_ENDPOINT = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=200`;
 
 let allOrders = []; // Stores all fetched orders for local filtering
 
