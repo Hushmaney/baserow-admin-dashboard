@@ -8,11 +8,11 @@ const BASEROW_API_KEY = "TXYNusXB6dycZSNPDBiMg19RfnnXM5zn"; // <-- YOUR API KEY
 const BASEROW_TABLE_ID = "714403"; // <-- YOUR TABLE ID
 const BASEROW_HOST_URL = "https://api.baserow.io"; 
 
-// Base URL for fetching data, ordered by ID descending (newest first, size=100)
-const BASE_ORDERS_URL = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=100&order_by=-id`;
+// --- FIXED LINE: Changed 'order_by=-id' to 'order_by=id' ---
+// This attempts to sort by the unique row ID field 'id' in ascending order.
+const BASE_ORDERS_URL = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=100&order_by=id`;
 
 // Endpoints to fetch 100 PENDING and 100 DELIVERED records
-// FIXED: Using '__contains' filter type for single_select fields (Status)
 const PENDING_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__contains=Pending`;
 const DELIVERED_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__contains=Delivered`;
 
@@ -33,7 +33,7 @@ async function fetchOrders() {
     allOrders = [];
     
     try {
-        // 1. Fetch 100 Pending Orders (Newest First)
+        // 1. Fetch 100 Pending Orders
         const pendingResponse = await fetch(PENDING_ENDPOINT, {
             method: 'GET',
             headers: {
@@ -42,7 +42,7 @@ async function fetchOrders() {
             }
         });
 
-        // 2. Fetch 100 Delivered Orders (Newest First)
+        // 2. Fetch 100 Delivered Orders
         const deliveredResponse = await fetch(DELIVERED_ENDPOINT, {
             method: 'GET',
             headers: {
@@ -52,7 +52,6 @@ async function fetchOrders() {
         });
 
         if (!pendingResponse.ok || !deliveredResponse.ok) {
-            // Get error text from the response that failed
             const failedResponse = pendingResponse.ok ? deliveredResponse : pendingResponse;
             const errorText = await failedResponse.text();
             throw new Error(`HTTP error! Status: ${failedResponse.status} - ${errorText}`);
@@ -75,7 +74,7 @@ async function fetchOrders() {
     }
 }
 
-// Function to filter and render the stored orders (No change here, still filters the local array)
+// Function to filter and render the stored orders
 function filterAndRenderOrders() {
     const selectedStatus = statusFilter.value;
     const searchTerm = searchBar.value.toLowerCase();
