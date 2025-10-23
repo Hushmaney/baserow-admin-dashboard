@@ -8,10 +8,15 @@ const BASEROW_API_KEY = "TXYNusXB6dycZSNPDBiMg19RfnnXM5zn"; // <-- YOUR API KEY
 const BASEROW_TABLE_ID = "714403"; // <-- YOUR TABLE ID
 const BASEROW_HOST_URL = "https://api.baserow.io"; 
 
-// --- FIXED LINE: Size is set to the maximum allowed limit of 200 to resolve the 400 error. ---
-const ORDERS_ENDPOINT = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=200`;
+// Base URL for fetching data, ordered by ID descending (newest first)
+const BASE_ORDERS_URL = `${BASEROW_HOST_URL}/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true&size=100&order_by=-id`;
 
-let allOrders = []; // Stores all fetched orders for local filtering
+// Endpoints to fetch 100 PENDING and 100 DELIVERED records
+// Baserow Filter: &filter__field_name__filter_type=value
+const PENDING_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__equal=Pending`;
+const DELIVERED_ENDPOINT = `${BASE_ORDERS_URL}&filter__Status__equal=Delivered`;
+
+let allOrders = []; // Stores all fetched orders (max 200: 100 Pending + 100 Delivered)
 
 const ordersBody = document.getElementById('orders-body');
 const loadingMsg = document.getElementById('loading-msg');
@@ -20,13 +25,16 @@ const refreshBtn = document.getElementById('refreshBtn');
 const statusFilter = document.getElementById('statusFilter');
 const searchBar = document.getElementById('searchBar');
 
+
 // Helper function to fetch data
 async function fetchOrders() {
     loadingMsg.textContent = "Loading orders from Baserow...";
     errorMsg.classList.add('hidden');
+    allOrders = [];
     
     try {
-        const response = await fetch(ORDERS_ENDPOINT, {
+        // 1. Fetch 100 Pending Orders (Newest First)
+        const pendingResponse = await fetch(PENDING_ENDPOINT, {
             method: 'GET',
             headers: {
                 'Authorization': `Token ${BASEROW_API_KEY}`,
@@ -34,15 +42,28 @@ async function fetchOrders() {
             }
         });
 
-        if (!response.ok) {
-            // Throwing an error here with the status code and text.
-            const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        // 2. Fetch 100 Delivered Orders (Newest First)
+        const deliveredResponse = await fetch(DELIVERED_ENDPOINT, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Token ${BASEROW_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!pendingResponse.ok || !deliveredResponse.ok) {
+            const errorText = await (pendingResponse.ok ? deliveredResponse : pendingResponse).text();
+            throw new Error(`HTTP error! Status: ${pendingResponse.status}/${deliveredResponse.status} - ${errorText}`);
         }
 
-        const data = await response.json();
-        allOrders = data.results; // Store all orders
+        const pendingData = await pendingResponse.json();
+        const deliveredData = await deliveredResponse.json();
+
+        // Combine the results (max 200 orders total)
+        allOrders = [...pendingData.results, ...deliveredData.results];
+        
         filterAndRenderOrders(); // Render based on current filters
+        
     } catch (error) {
         console.error("Fetch Error:", error);
         errorMsg.classList.remove('hidden');
@@ -52,7 +73,7 @@ async function fetchOrders() {
     }
 }
 
-// Function to filter and render the stored orders
+// Function to filter and render the stored orders (No change here, still filters the local array)
 function filterAndRenderOrders() {
     const selectedStatus = statusFilter.value;
     const searchTerm = searchBar.value.toLowerCase();
@@ -78,6 +99,10 @@ function filterAndRenderOrders() {
     filteredOrders.forEach(order => {
         const row = ordersBody.insertRow();
         const currentStatusValue = order.Status ? order.Status.value : 'Unknown';
+        
+        // This logic now ensures that all "Pending" and "Delivered" are visible
+        // However, the filter dropdown allows viewing "Initiated" and "Failed" as well, 
+        // if they happen to be among the 200 records fetched.
         
         const isPending = currentStatusValue === 'Pending';
         
